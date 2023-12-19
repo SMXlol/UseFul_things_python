@@ -166,15 +166,12 @@ def func(message):
         bot.send_message(message.chat.id,
                          "Привет, нажми на кнопку и перейди в тг канал))))".format(message.from_user),
                          reply_markup=markup)
-
-def save_chat_history(message):
-    filePath = 'chat_history.txt'
-    file = open(filePath, 'a')
-    message_user = f"пользователь {message.from_user.username} пишет: {message.text}  "
-    file.write(message_user)
-    file.write("\n")
-
-
+    else:
+        filePath = 'chat_history.txt'
+        file = open(filePath, 'a')
+        message_user = f"Пользователь {message.from_user.username} пишет: {message.text}  "
+        file.write(message_user)
+        file.write("\n")
 
 
 bot.infinity_polling(none_stop=True)
