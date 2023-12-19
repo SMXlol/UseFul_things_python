@@ -3,7 +3,7 @@ from telebot import types
 import time
 
 bot = telebot.TeleBot(
-    '5813989102:AAGC6F9pb4uNRxT_4J4CVX92N7Yu6igR5ZA')  # в TOKEN мы вводим непосредственно сам полученный токен.
+    'Водим токен')  # в TOKEN мы вводим непосредственно сам полученный токен.
 
 chat_id_spam = 0
 spam_message = "0"
