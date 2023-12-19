@@ -20,21 +20,6 @@ def start(message):
                          message.from_user), reply_markup=markup)
 
 
-# @bot.message_handler(content_types=['text'])
-# def func(message):
-#     if message.text == "👋 Помощь":
-#         bot.send_message(message.chat.id, text="Привеет... Держи помощь!!!)")
-#         help(message)
-#     elif message.text == "❓ А у создателя есть тг канал???":
-#         markup = types.InlineKeyboardMarkup()
-#         button1 = types.InlineKeyboardButton("Канал S(MI)X", url='https://t.me/SMXrehub')
-#         markup.add(button1)
-#         bot.send_message(message.chat.id,
-#                          "Привет, нажми на кнопку и перейди в тг канал))))".format(message.from_user),
-#                          reply_markup=markup)
-
-
-
 @bot.message_handler(commands=['help'])
 def help(message):
     bot.reply_to(message,
@@ -168,7 +153,7 @@ def func(message):
                          reply_markup=markup)
     else:
         filePath = 'chat_history.txt'
-        file = open(filePath, 'a')
+        file = open(filePath, 'w')
         message_user = f"Пользователь {message.from_user.username} пишет: {message.text}  "
         file.write(message_user)
         file.write("\n")
