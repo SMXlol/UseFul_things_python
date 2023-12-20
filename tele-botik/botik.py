@@ -3,7 +3,7 @@ from telebot import types
 import time
 
 bot = telebot.TeleBot(
-    'Водим токен')  # в TOKEN мы вводим непосредственно сам полученный токен.
+    '6437723559:AAF09iFKM80auh5cYGxIsGDcuUntNlUzBrs')  # в TOKEN мы вводим непосредственно сам полученный токен.
 
 chat_id_spam = 0
 spam_message = "0"
@@ -24,7 +24,7 @@ def start(message):
 def help(message):
     bot.reply_to(message,
                  "/kick - кикнуть пользователя\n/mute - замутить пользователя на определенное время\n/unmute - "
-                 "размутить пользователя\n/get_id - получить никнейм, id группы и id  человека\n/spam - отправка "
+                 "размутить пользователя\n/get_id - получить никнейм, id группы и id  человека\n/s - отправка "
                  "сообщений в группу через бота")
 
 
@@ -153,10 +153,10 @@ def func(message):
                          reply_markup=markup)
     else:
         filePath = 'chat_history.txt'
-        file = open(filePath, 'w')
-        message_user = f"Пользователь {message.from_user.username} пишет: {message.text}  "
+        file = open(filePath, 'a')
+        message_user = f"Пользователь {message.from_user.username} в группе <<{message.chat.title}>> пишет: {message.text}  "
         file.write(message_user)
         file.write("\n")
 
 
-bot.infinity_polling(none_stop=True)
+bot.infinity_polling(none_stop=True, interval=0)
