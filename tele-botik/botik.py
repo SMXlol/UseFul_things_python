@@ -1,16 +1,13 @@
-from datetime import datetime, timedelta
-
 import telebot as telebot
 from telebot import types
 import time
-
 
 bot = telebot.TeleBot(
     'token')  # в TOKEN мы вводим непосредственно сам полученный токен.
 
 chat_id_spam = 0
 spam_message = "0"
-forbidden_words = ['хуй', 'бля', 'хуе', 'еба', 'xуй', 'xуе', 'eба', 'пизд', 'ебa', 'ебa']  # Замените на свой список запрещенных слов
+forbidden_words = ['хуe', 'xyе', 'хyй', 'xyй', 'хуй', 'бля', 'хуе', 'еба', 'xуй', 'xуе', 'eба', 'пизд', 'ебa', 'дота', 'ебa']  # Замените на свой список запрещенных слов
 
 user_mute_list = {}
 
@@ -54,8 +51,8 @@ def kick_user(message):
 def mute_user(message):
     if message.reply_to_message:
         chat_id = message.chat.id
-        user_id = message.reply_to_message.from_user.id
-        user_status = bot.get_chat_member(chat_id, user_id).status
+        user_id_get = message.reply_to_message.from_user.id
+        user_status = bot.get_chat_member(chat_id, user_id_get).status
         if user_status == 'administrator' or user_status == 'creator':
             bot.reply_to(message, "Невозможно замутить администратора.")
         else:
@@ -73,12 +70,14 @@ def mute_user(message):
                 if duration > 1440:
                     bot.reply_to(message, "Максимальное время - 1 день.")
                     return
-            bot.restrict_chat_member(chat_id, user_id, until_date=time.time() + duration * 60)
+            bot.restrict_chat_member(chat_id, user_id_get, can_send_messages=False, can_send_media_messages=False,
+                                     can_send_other_messages=False, can_add_web_page_previews=False)
             bot.reply_to(message,
                          f"Пользователь {message.reply_to_message.from_user.username} замучен на {duration} минут.")
     else:
         bot.reply_to(message,
                      "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите замутить.")
+
 
 @bot.message_handler(commands=['unmute'])
 def unmute_user(message):
@@ -171,20 +170,24 @@ def func(message):
 
 
 def check_forbidden_words(message):
-    user_id = message.from_user.id
+    user_id_get = message.from_user.id
     user_text = message.text.lower()
 
     if any(word in user_text for word in forbidden_words):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        bot.send_message(message.chat.id, f"Пользователь @{message.from_user.username} замучен на час за использование запрещенных слов.")
+        bot.send_message(message.chat.id,
+                         f"Пользователь @{message.from_user.username} замучен на час за использование запрещенных слов.")
         chat_id = message.chat.id
-        mute_user_1(user_id, chat_id)
-def mute_user_1(user_id, chat_id):
-    user_status = bot.get_chat_member(chat_id, user_id).status
+        mute_user_1(user_id_get, chat_id)
+
+
+def mute_user_1(user_id_get, chat_id):
+    user_status = bot.get_chat_member(chat_id, user_id_get).status
     if user_status == 'administrator' or user_status == 'creator':
         bot.send_message("Невозможно замутить администратора.")
-    duration = time.time()
-    bot.restrict_chat_member(chat_id, user_id, until_date=time.time() + 120)
+    else:
+        bot.restrict_chat_member(chat_id, user_id_get, can_send_messages=False, can_send_media_messages=False,
+                                 can_send_other_messages=False, can_add_web_page_previews=False)
 
 
 bot.infinity_polling(none_stop=True, interval=0)
