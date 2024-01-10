@@ -1,12 +1,18 @@
-import telebot
+from datetime import datetime, timedelta
+
+import telebot as telebot
 from telebot import types
 import time
 
+
 bot = telebot.TeleBot(
-    'Your token')  # в TOKEN мы вводим непосредственно сам полученный токен.
+    '6129671832:AAFrEYURYRdFp_K4CaeSQKhZH4sjZOa4c34')  # в TOKEN мы вводим непосредственно сам полученный токен.
 
 chat_id_spam = 0
 spam_message = "0"
+forbidden_words = ['хуй', 'бля', 'хуе', 'еба', 'xуй', 'xуе', 'eба', 'пизд', 'ебa', 'ебa']  # Замените на свой список запрещенных слов
+
+user_mute_list = {}
 
 
 @bot.message_handler(commands=['start'])
@@ -24,8 +30,8 @@ def start(message):
 def help(message):
     bot.reply_to(message,
                  "/kick - кикнуть пользователя\n/mute - замутить пользователя на определенное время\n/unmute - "
-                 "размутить пользователя\n/get_id - получить никнейм, id группы и id  человека\n/s - отправка "
-                 "сообщений в группу через бота")
+                 "размутить пользователя\n/get_id - получить никнейм, id группы и id  человека\n/send_message - отправка "
+                 "сообщений в группу через бота (Доступно не всем)")
 
 
 @bot.message_handler(commands=['kick'])
@@ -73,6 +79,7 @@ def mute_user(message):
     else:
         bot.reply_to(message,
                      "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите замутить.")
+
 @bot.message_handler(commands=['unmute'])
 def unmute_user(message):
     if message.reply_to_message:
@@ -86,14 +93,17 @@ def unmute_user(message):
                      "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите размутить.")
 
 
-@bot.message_handler(commands=['spam'])
+@bot.message_handler(commands=['send_message'])
 def spam_input(message):
     if message.chat.type == 'group' or message.chat.type == 'supergroup':
         bot.reply_to(message, "Введите сообщение в личную переписку с ботом")
 
     else:
-        sent = bot.send_message(message.from_user.id, "Введите id группы")
-        bot.register_next_step_handler(sent, get_id)
+        if message.from_user.username == "re_smx":
+            sent = bot.send_message(message.from_user.id, "Введите id группы")
+            bot.register_next_step_handler(sent, get_id)
+        else:
+            bot.reply_to(message, "Вы должны обладать правами супер пользователя!")
 
 
 def get_id(message):
@@ -154,9 +164,27 @@ def func(message):
     else:
         filePath = 'chat_history.txt'
         file = open(filePath, 'a')
-        message_user = f"Пользователь {message.from_user.username} в группе <<{message.chat.title}>> пишет: {message.text}  "
+        message_user = f"Пользователь @{message.from_user.username} в группе <<{message.chat.title}>> пишет: {message.text}  "
         file.write(message_user)
         file.write("\n")
+    check_forbidden_words(message)
+
+
+def check_forbidden_words(message):
+    user_id = message.from_user.id
+    user_text = message.text.lower()
+
+    if any(word in user_text for word in forbidden_words):
+        bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+        bot.send_message(message.chat.id, f"Пользователь @{message.from_user.username} замучен на час за использование запрещенных слов.")
+        chat_id = message.chat.id
+        mute_user_1(user_id, chat_id)
+def mute_user_1(user_id, chat_id):
+    user_status = bot.get_chat_member(chat_id, user_id).status
+    if user_status == 'administrator' or user_status == 'creator':
+        bot.send_message("Невозможно замутить администратора.")
+    duration = time.time()
+    bot.restrict_chat_member(chat_id, user_id, until_date=time.time() + 120)
 
 
 bot.infinity_polling(none_stop=True, interval=0)
