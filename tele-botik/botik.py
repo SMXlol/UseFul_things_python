@@ -1,61 +1,40 @@
-import telebot as telebot
+import telebot
 from telebot import types
 import time
 
-bot = telebot.TeleBot(
-    'token')  # в TOKEN мы вводим непосредственно сам полученный токен.
+bot = telebot.TeleBot('TOKEN')
 
-chat_id_spam = 0
-spam_message = "0"
-forbidden_words = ['хуe', 'xyе', 'хyй', 'xyй', 'хуй', 'бля', 'хуе', 'еба', 'xуй', 'xуе', 'eба', 'пизд', 'ебa', 'дота', 'ебa']  # Замените на свой список запрещенных слов
+# Остальной код без изменений до этого момента...
 
-user_mute_list = {}
+# Изменения в функции check_forbidden_words
+forbidden_words = ['хуe', 'xyе', 'хyй', 'xyй', 'хуй', 'бля', 'хуе', 'еба', 'xуй', 'xуе', 'eба', 'пизд', 'ебa', 'дота', 'ебa', 'военкомат']  # Замените на свой список запрещенных слов
 
+def check_forbidden_words(message):
+    user_id = message.from_user.id
+    user_text = message.text.lower()
 
-@bot.message_handler(commands=['start'])
-def start(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.KeyboardButton("👋 Помощь")
-    btn2 = types.KeyboardButton("❓ А у создателя есть тг канал???")
-    markup.add(btn1, btn2)
-    bot.send_message(message.chat.id,
-                     text="Привет, Я бот для управления чатом. Используй кнопки внизу чтобы узнать больше...".format(
-                         message.from_user), reply_markup=markup)
+    if any(word in user_text for word in forbidden_words):
+        bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+        bot.send_message(message.chat.id,
+                         f"Пользователь @{message.from_user.username} замучен на час за использование запрещенных слов.")
+        mute_user_1(user_id, message.chat.id)
 
+# Изменения в функции mute_user_1
+def mute_user_1(user_id, chat_id):
+    user_status = bot.get_chat_member(chat_id, user_id).status
+    if user_status not in ('administrator', 'creator'):
+        bot.restrict_chat_member(chat_id, user_id, can_send_messages=False, can_send_media_messages=False,
+                                 can_send_other_messages=False, can_add_web_page_previews=False)
 
-@bot.message_handler(commands=['help'])
-def help(message):
-    bot.reply_to(message,
-                 "/kick - кикнуть пользователя\n/mute - замутить пользователя на определенное время\n/unmute - "
-                 "размутить пользователя\n/get_id - получить никнейм, id группы и id  человека\n/send_message - отправка "
-                 "сообщений в группу через бота (Доступно не всем)")
-
-
-@bot.message_handler(commands=['kick'])
-def kick_user(message):
-    if message.reply_to_message:
+# Изменения в функции mute_user
+@bot.message_handler(commands=['mute'])
+def mute_user(message):
+    user_status_main = bot.get_chat_member(message.chat.id, message.from_user.id).status
+    if user_status_main in ('administrator', 'creator') and message.reply_to_message:
         chat_id = message.chat.id
         user_id = message.reply_to_message.from_user.id
         user_status = bot.get_chat_member(chat_id, user_id).status
-        if user_status == 'administrator' or user_status == 'creator':
-            bot.reply_to(message, "Невозможно кикнуть администратора.")
-        else:
-            bot.kick_chat_member(chat_id, user_id)
-            bot.reply_to(message, f"Пользователь {message.reply_to_message.from_user.username} был кикнут.")
-    else:
-        bot.reply_to(message,
-                     "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите кикнуть.")
-
-
-@bot.message_handler(commands=['mute'])
-def mute_user(message):
-    if message.reply_to_message:
-        chat_id = message.chat.id
-        user_id_get = message.reply_to_message.from_user.id
-        user_status = bot.get_chat_member(chat_id, user_id_get).status
-        if user_status == 'administrator' or user_status == 'creator':
-            bot.reply_to(message, "Невозможно замутить администратора.")
-        else:
+        if user_status not in ('administrator', 'creator'):
             duration = 60  # Значение по умолчанию - 1 минута
             args = message.text.split()[1:]
             if args:
@@ -70,13 +49,14 @@ def mute_user(message):
                 if duration > 1440:
                     bot.reply_to(message, "Максимальное время - 1 день.")
                     return
-            bot.restrict_chat_member(chat_id, user_id_get, can_send_messages=False, can_send_media_messages=False,
+            bot.restrict_chat_member(chat_id, user_id, can_send_messages=False, can_send_media_messages=False,
                                      can_send_other_messages=False, can_add_web_page_previews=False)
             bot.reply_to(message,
                          f"Пользователь {message.reply_to_message.from_user.username} замучен на {duration} минут.")
+        else:
+            bot.reply_to(message, "Невозможно замутить администратора.")
     else:
-        bot.reply_to(message,
-                     "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите замутить.")
+        bot.reply_to(message, "Вы должны быть администратором и использовать команду в ответ на сообщение пользователя.")
 
 
 @bot.message_handler(commands=['unmute'])
@@ -167,19 +147,6 @@ def func(message):
         file.write(message_user)
         file.write("\n")
     check_forbidden_words(message)
-
-
-def check_forbidden_words(message):
-    user_id_get = message.from_user.id
-    user_text = message.text.lower()
-
-    if any(word in user_text for word in forbidden_words):
-        bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        bot.send_message(message.chat.id,
-                         f"Пользователь @{message.from_user.username} замучен на час за использование запрещенных слов.")
-        chat_id = message.chat.id
-        mute_user_1(user_id_get, chat_id)
-
 
 def mute_user_1(user_id_get, chat_id):
     user_status = bot.get_chat_member(chat_id, user_id_get).status
