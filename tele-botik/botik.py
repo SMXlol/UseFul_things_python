@@ -2,12 +2,14 @@ import telebot
 from telebot import types
 import time
 
-bot = telebot.TeleBot('TOKEN')
+bot = telebot.TeleBot('6129671832:AAFrEYURYRdFp_K4CaeSQKhZH4sjZOa4c34')
 
 # Остальной код без изменений до этого момента...
 
 # Изменения в функции check_forbidden_words
-forbidden_words = ['хуe', 'xyе', 'хyй', 'xyй', 'хуй', 'бля', 'хуе', 'еба', 'xуй', 'xуе', 'eба', 'пизд', 'ебa', 'дота', 'ебa', 'военкомат']  # Замените на свой список запрещенных слов
+forbidden_words = ['хуe', 'xyе', 'хyй', 'xyй', 'хуй', 'бля', 'хуе', 'еба', 'xуй', 'xуе', 'eба', 'пизд', 'ебa', 'дота',
+                   'ебa', 'военкомат']  # Замените на свой список запрещенных слов
+
 
 def check_forbidden_words(message):
     user_id = message.from_user.id
@@ -19,12 +21,14 @@ def check_forbidden_words(message):
                          f"Пользователь @{message.from_user.username} замучен на час за использование запрещенных слов.")
         mute_user_1(user_id, message.chat.id)
 
+
 # Изменения в функции mute_user_1
 def mute_user_1(user_id, chat_id):
     user_status = bot.get_chat_member(chat_id, user_id).status
     if user_status not in ('administrator', 'creator'):
         bot.restrict_chat_member(chat_id, user_id, can_send_messages=False, can_send_media_messages=False,
                                  can_send_other_messages=False, can_add_web_page_previews=False)
+
 
 # Изменения в функции mute_user
 @bot.message_handler(commands=['mute'])
@@ -56,7 +60,8 @@ def mute_user(message):
         else:
             bot.reply_to(message, "Невозможно замутить администратора.")
     else:
-        bot.reply_to(message, "Вы должны быть администратором и использовать команду в ответ на сообщение пользователя.")
+        bot.reply_to(message,
+                     "Вы должны быть администратором и использовать команду в ответ на сообщение пользователя.")
 
 
 @bot.message_handler(commands=['unmute'])
@@ -118,6 +123,25 @@ def cout(message):
     bot.send_message(message.from_user.id, j)
 
 
+@bot.message_handler(commands=['start'])
+def start(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("👋 Помощь")
+    btn2 = types.KeyboardButton("❓ А у создателя есть тг канал???")
+    markup.add(btn1, btn2)
+    bot.send_message(message.chat.id,
+                     text="Привет, Я бот для управления чатом. Используй кнопки внизу чтобы узнать больше...".format(
+                         message.from_user), reply_markup=markup)
+
+
+@bot.message_handler(commands=['help'])
+def help(message):
+    bot.reply_to(message,
+                 "/kick - кикнуть пользователя\n/mute - замутить пользователя на определенное время\n/unmute - "
+                 "размутить пользователя\n/get_id - получить никнейм, id группы и id  человека\n/send_message - отправка "
+                 "сообщений в группу через бота (Доступно не всем)")
+
+
 # получаем ай ди пользователя и чата
 @bot.message_handler(commands=['get_id'])
 def user_id(message):
@@ -147,6 +171,7 @@ def func(message):
         file.write(message_user)
         file.write("\n")
     check_forbidden_words(message)
+
 
 def mute_user_1(user_id_get, chat_id):
     user_status = bot.get_chat_member(chat_id, user_id_get).status
