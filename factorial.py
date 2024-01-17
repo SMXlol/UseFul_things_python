@@ -29,17 +29,17 @@ numer = int(input("Введите значение numer "))
 print("______________________________________________")
 
 print(f"{fact_math(numer)}-результаты через формулу стирлинга")
-print(f"{fact_math(numer)-mothik(numer)}-погрешность")
+print(f"{fact_math(numer)/(mothik(numer)/100)-100} процентов - погрешность")
 print("______________________________________________")
 
 print(f"{factorial(numer)}-результаты через цикл")
-print(f"{factorial(numer)-mothik(numer)}-погрешность")
+print(f"{factorial(numer)/(mothik(numer)/100)-100} процентов - погрешность")
 print("______________________________________________")
 
 print(f"{factorial_rec(numer)}-результаты через рекурсию")
-print(f"{factorial_rec(numer)-mothik(numer)}-погрешность")
+print(f"{factorial_rec(numer)/(mothik(numer)/100)-100} процентов - погрешность")
 print("______________________________________________")
 
 print(f"{mothik(numer)}-результаты через библиотеку math")
-print(f"{mothik(numer)-mothik(numer)}-погрешность")
+print(f"{mothik(numer)/(mothik(numer)/100)-100} процентов - погрешность")
 print("______________________________________________")
