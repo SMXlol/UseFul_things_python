@@ -1,0 +1,20 @@
+{
+    "workers": [
+        {
+            "name": "Ivan",
+            "last_name": "Durov",
+            "post": "Director",
+            "salary": 100000
+        },
+        {
+            "name": "Tom",
+            "last_name": "Niger",
+            "post": "Cleaner",
+            "salary": 15000
+        }
+    ],
+    "dict": [
+        "Durov",
+        "Niger"
+    ]
+}
